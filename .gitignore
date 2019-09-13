@@ -1,1 +1,7 @@
-/bin/
+timevaryinggraphph.config
+.settings/
+.DS_Store
+.classpath
+bin/
+example_data/ignore.txt
+example_data/shortestpath/
