@@ -8,6 +8,10 @@ Software for the paper:
     
     IEEE Pacific Visualization Symposium (PacificVis), 125-134
 
+Limitations
+
+- Current version only supports shortestpath distance and limited visualization capabilities.
+
 Prerequisites 
 
 - Ripser --- https://github.com/Ripser
