@@ -1,14 +1,10 @@
 import networkx as nx
-import numpy.linalg
-import ripser as ripser
 import numpy as np
-import matplotlib.pyplot as plt
-import math
-import sys
+import numpy.linalg
 import os
 import argparse
-import eigendistance as ed
-
+import mod_eigendistance as ed
+import mod_graph_tda as tda
 
 parser = argparse.ArgumentParser(description='Calculate Graph Persistence Diagrams Based on Various Distance Measures.')
 parser.add_argument( '-d', '--directory', metavar='[dir]', nargs=1, required=True, help='directory containing graphs (edgelist format)' )
@@ -30,31 +26,6 @@ for X in os.listdir( args.directory[0] ):
 files.sort();
 
 
-
-
-
-def calculate_persistence_diagram( dist_matrix, pd_out ):
-    R = ripser.ripser( dist_matrix, distance_matrix=True )
-
-    for x in R['dgms'][0]:
-        pd_out['pd0'].append( x )
-        
-    for x in R['dgms'][1]:
-        pd_out['pd1'].append( x )
-
-
-def save_persistence_diagram( pd, outfile ):
-    f = open( outfile, "w" )
-
-    for x in pd['pd0']:
-        #f.write( "0 " + str(x[0]) + " " + str(x[1]) + "\n" )
-        f.write( str(x[0]) + " " + str(x[1]) + "\n" )
-
-    for x in pd['pd1']:
-        #f.write( "1 " + str(x[0]) + " " + str(x[1]) + "\n" )
-        f.write( str(x[0]) + " " + str(x[1]) + "\n" )
-
-    f.close()
 
 
 
@@ -82,8 +53,8 @@ for inFile in files:
         sg = G.subgraph(c)
     
         if computeSP :
-            sd = numpy.asarray( nx.floyd_warshall_numpy(sg) )
-            calculate_persistence_diagram( sd, sd_pd )
+            sd = np.asarray( nx.floyd_warshall_numpy(sg) )
+            tda.calculate_persistence_diagram( sd, sd_pd )
         
         if computeBD or computeCD or computeDD:
             L = nx.laplacian_matrix(sg)
@@ -92,28 +63,28 @@ for inFile in files:
             if computeBD :
                 bd = ed.fast_eigendistance_distance( E[0], E[1], "BIHARMONIC", {'approx_thrd':approx_thrd} )
                 #bd = eigendistance_distance( E[0], E[1], "BIHARMONIC" )
-                calculate_persistence_diagram( bd, bd_pd )
+                tda.calculate_persistence_diagram( bd, bd_pd )
             
             if computeCD :
                 cd = ed.fast_eigendistance_distance( E[0], E[1], "COMMUTE", {'approx_thrd':approx_thrd} )
                 #cd = eigendistance_distance( E[0], E[1], "COMMUTE" )
-                calculate_persistence_diagram( cd, cd_pd )
+                tda.calculate_persistence_diagram( cd, cd_pd )
         
             if computeDD :
                 dd = ed.fast_eigendistance_distance( E[0], E[1], "DIFFUSION", {'time':diffusion_time,'approx_thrd':approx_thrd} )
                 #dd = eigendistance_distance( E[0], E[1], "DIFFUSION",  {'time':diffusion_time} )
-                calculate_persistence_diagram( dd, dd_pd )
+                tda.calculate_persistence_diagram( dd, dd_pd )
         
 
     if computeSP :
-        save_persistence_diagram( sd_pd, base_filename + "_spath.dgm" )
+        tda.save_persistence_diagram( sd_pd, base_filename + "_spath.dgm" )
         
     if computeBD :
-        save_persistence_diagram( bd_pd, base_filename + "_biharm.dgm" )
+        tda.save_persistence_diagram( bd_pd, base_filename + "_biharm.dgm" )
         
     if computeCD :
-        save_persistence_diagram( cd_pd, base_filename + "_comm.dgm" )
+        tda.save_persistence_diagram( cd_pd, base_filename + "_comm.dgm" )
         
     if computeDD :
-        save_persistence_diagram( dd_pd, base_filename + "_diff_0.1.dgm" )
+        tda.save_persistence_diagram( dd_pd, base_filename + "_diff_0.1.dgm" )
 
