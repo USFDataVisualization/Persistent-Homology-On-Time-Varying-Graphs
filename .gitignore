@@ -5,3 +5,8 @@ timevaryinggraphph.config
 bin/
 example_data/ignore.txt
 example_data/shortestpath/
+data_generator/__pycache__
+flask/__pycache__
+flask/venv
+data/CollegeMsg*
+data/*.txt

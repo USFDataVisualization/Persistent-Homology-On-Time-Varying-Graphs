@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+<head>
+	
+	<!-- Required meta tags -->
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+	<link rel="stylesheet" href="static/style.css">
+
+	<script src="https://d3js.org/d3.v4.js"></script>
+	
+	<link rel="apple-touch-icon" sizes="57x57" href="static/favicon/apple-icon-57x57.png">
+	<link rel="apple-touch-icon" sizes="60x60" href="static/favicon/apple-icon-60x60.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="static/favicon/apple-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="76x76" href="static/favicon/apple-icon-76x76.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="static/favicon/apple-icon-114x114.png">
+	<link rel="apple-touch-icon" sizes="120x120" href="static/favicon/apple-icon-120x120.png">
+	<link rel="apple-touch-icon" sizes="144x144" href="static/favicon/apple-icon-144x144.png">
+	<link rel="apple-touch-icon" sizes="152x152" href="static/favicon/apple-icon-152x152.png">
+	<link rel="apple-touch-icon" sizes="180x180" href="static/favicon/apple-icon-180x180.png">
+	<link rel="icon" type="image/png" sizes="192x192"  href="static/favicon/android-icon-192x192.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="static/favicon/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="96x96" href="static/favicon/favicon-96x96.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="static/favicon/favicon-16x16.png">
+	<link rel="manifest" href="static/favicon/manifest.json">
+	<meta name="msapplication-TileColor" content="#ffffff">
+	<meta name="msapplication-TileImage" content="static/favicon/ms-icon-144x144.png">
+	<meta name="theme-color" content="#ffffff">	
+	
+	<title>Persistent Homology on Time Varying Graphs</title>
+	
+</head>
+<body>
+	<div>
+		<h1>Persistent Homology on Time Varying Graphs</h1>
+	</div>
+
+		
+	<div class="page">
+		
+		<div class="sidebar">
+		  <form id="parameterForm">
+			<div class="form-group">
+			  <label for="dataset">Dataset</label>
+			  <select class="form-control form-control-sm" id="dataset" name="dataset" onchange="reloadData()">
+				<option value="college">CollegeMsg</option>
+			  </select>
+			</div>
+			<div class="form-group">
+			  <label for="graph_dist">Graph Distance</label>
+			  <select class="form-control form-control-sm" id="graph_dist" name="graph_dist" onchange="reloadData()">
+				<option value="shortest">Shortest Path</option>
+				<option value="commute">Commute Time</option>
+				<option value="diffusion">Diffusion Distance</option>
+				<option value="biharmonic">Biharmonic Distance</option>
+			  </select>
+			</div>
+			<div class="form-group">
+			  <label for="splits">Splits</label>
+			  <select class="form-control form-control-sm" id="splits" name="splits" onchange="reloadData()">
+				<option value="20">20</option>
+				<option value="40">40</option>
+				<option value="60">60</option>
+				<option value="80">80</option>
+				<option value="100">100</option>
+			  </select>
+			</div>
+			<div class="form-group">
+			  <label for="overlap">Overlap</label>
+			  <select class="form-control form-control-sm" id="overlap" name="overlap" onchange="reloadData()">
+				<option value="0.05">5%</option>
+				<option value="0.1">10%</option>
+				<option value="0.25">25%</option>
+				<option value="0.5">50%</option>
+			  </select>
+			</div>
+			<div class="form-group">
+			  <label for="topo_dist">Topological Distance</label>
+			  <select class="form-control form-control-sm" id="topo_dist" name="topo_dist" onchange="reloadData()">
+				<option value="bottleneck">Bottleneck Distance</option>
+				<option value="wasserstein">Wasserstein Distance</option>
+			  </select>
+			</div>
+			<div class="form-group">
+			  <label for="method">Dimension Reduction</label>
+			  <select class="form-control form-control-sm" id="method" name="method" onchange="reloadData()">
+				<option value="mds">MDS</option>
+				<option value="isomap">Isomap</option>
+				<option value="tsne">T-SNE</option>
+			  </select>
+			</div>
+		  </form>			
+		</div>
+		
+		
+		<div class="page-content" id="visualization">
+				<div style="width: 1050px; text-align: center;">
+				  <svg width="500" height="400" style="border: none;" id="graph_vis"></svg>
+					<span style="width: 50px; min-width: 50px;">&nbsp; &nbsp; &nbsp; </span>
+				  <svg width="350" height="350" style="border: solid; border-right: none; border-top: none;" id="scatterplot"></svg>
+				</div>
+				<div>
+					<svg width="1000" height="250" style="border: none;" id="linechart"></svg>
+				</div>
+		  </div>
+	</div>
+	
+	<script>
+		
+		function reloadData(){
+			/*
+			var http = new XMLHttpRequest();
+			http.open("GET", "http://localhost:5000/dimred?" + $('#parameterForm').serialize(), true);
+			http.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+			http.send();
+			http.onload = function() {
+				document.getElementById("visualization").innerHTML = http.responseText;
+			}
+			*/
+			
+			$("#scatterplot").empty();
+			$("#linechart").empty();
+			
+			
+	        d3.json( "http://localhost:5000/dimred?dim=1&" + $('#parameterForm').serialize(), function(dtmp) {
+								
+				var lc_svg = d3.select("#linechart");
+				var lc_svg_width  = +lc_svg.attr("width");
+				var lc_svg_height = +lc_svg.attr("height");
+
+
+				var lc_margin = {left: 10, right: 15, top: 10, bottom: 15},
+					lc_width  = lc_svg_width  - lc_margin.left - lc_margin.right,
+					lc_height = lc_svg_height - lc_margin.top  - lc_margin.bottom;
+
+				curr = 0;
+				data = dtmp.map( function(d){
+					return {'x':curr++,'y':d[0]};
+				});
+				
+				xExt = [0,data.length-1];
+                yExt = d3.extent( data, function(d){ return d['y']; });
+				
+                var xAxis = d3.scaleLinear().domain( xExt ).range([ 0, lc_width ]);
+                var yAxis = d3.scaleLinear().domain( yExt ).range([ lc_height, 0]);
+				
+				lc_svg.append("path")
+                    .attr("transform", "translate(" + lc_margin.left + "," + lc_margin.top + ")")
+					  .datum(data)
+					  .attr("fill", "none")
+					  .attr("stroke", "steelblue")
+					  .attr("stroke-width", 2)
+					  .attr("d", d3.line()
+						.x(function(d) { return xAxis(d['x']); })
+						.y(function(d) { return yAxis(d['y']); })
+						);
+				
+                lc_svg.append('g')
+                    .attr("transform", "translate(" + lc_margin.left + "," + lc_margin.top + ")")
+                    .attr("fill", "steelblue")
+					.attr("stroke", "black")
+					  .attr("stroke-width", 1)
+                    .selectAll("dot")
+                    .data(data)
+                    .enter()
+                    .append("circle")
+                	.attr("cx", function (d) { return xAxis(d['x']); })
+                    .attr("cy", function (d) { return yAxis(d['y']); })
+                    .attr("r", 5)
+					.on("click", handleClick)
+					.on("mouseover", handleMouseOver)
+					.on("mouseout", handleMouseOut);
+				
+				
+			});
+			
+			
+			
+	        d3.json( "http://localhost:5000/dimred?dim=2&" + $('#parameterForm').serialize(), function(data) {
+				
+				
+                xExt = d3.extent( data, function(d){ return d[0]; });
+                yExt = d3.extent( data, function(d){ return d[1]; });
+				
+				var sp_svg = d3.select("#scatterplot");
+				var sp_svg_width  = +sp_svg.attr("width");
+				var sp_svg_height = +sp_svg.attr("height");
+
+
+				var sp_margin = {left: 10, right: 15, top: 10, bottom: 15},
+					sp_width  = sp_svg_width  - sp_margin.left - sp_margin.right,
+					sp_height = sp_svg_height - sp_margin.top  - sp_margin.bottom;
+				
+				
+				//console.log( sp_svg );
+				
+                  var xAxis = d3.scaleLinear().domain( xExt ).range([ 0, sp_width ]);
+                  var yAxis = d3.scaleLinear().domain( yExt ).range([ sp_height, 0]);
+                
+                  //sp_svg.append("g")
+                  //  .attr("transform", "translate(30," + (sp_height+margin.top) + ")")
+                  //  .call(d3.axisBottom(xAxis));
+
+                  // Add Y axis
+                  //sp_svg.append("g")
+                  //  .attr("transform", "translate(30,10)")
+                  //  .call(d3.axisLeft(yAxis));
+
+                  // Add dots
+                  sp_svg.append('g')
+                    .attr("transform", "translate(" + sp_margin.left + "," + sp_margin.top + ")")
+                    .selectAll("dot")
+                    .data(data)
+                    .enter()
+						.append("circle")
+							.attr("cx", function (d) { return xAxis(d[0]); } )
+							.attr("cy", function (d) { return yAxis(d[1]); } )
+							.attr("r", 5)
+							.attr("fill", "steelblue")
+							.attr("stroke", "black")
+							.on("click", handleClick)
+							.on("mouseover", handleMouseOver)
+							.on("mouseout", handleMouseOut);
+
+			});
+
+			
+			
+		}
+		
+		
+
+			var prior_sel_idx = -1;
+			var prior_sel_obj = null;
+			function handleClick( datum, idx ){
+				console.log(idx);
+				if( prior_sel_idx == idx ) return;
+				
+				if( prior_sel_obj != null ){
+					prior_sel_obj.attr("fill", "steelblue");
+					prior_sel_obj.attr( "stroke-width", 1 );
+				}
+				
+				curr_sel = d3.select(this);
+				curr_sel.attr("fill", "orange");
+				
+				d3.json( "http://localhost:5000/graph?instance=" + idx + "&" + $('#parameterForm').serialize(), function(data) {
+					console.log( data );
+				});
+				
+				
+				prior_sel_idx = idx;
+				prior_sel_obj = curr_sel;
+				
+				reload_graph();
+			}
+			
+			function handleMouseOver( datum, idx ) {  // Add interactivity
+				console.log(idx);
+				curr_sel = d3.select(this);
+				curr_sel.attr( "stroke-width", 4 );
+			  }
+
+			function handleMouseOut( datum, idx ) {
+				
+				if( prior_sel_idx == idx ) return;
+				
+				curr_sel = d3.select(this);
+				curr_sel.attr( "stroke-width", 1 );
+          	}					
+  </script> 
+
+
+
+	
+	<script>
+		
+		var simulation = null;
+		var prior_tform = null;
+
+		function reload_graph( ){
+
+			$("#graph_vis").empty();		
+			
+			if( prior_sel_idx < 0 ) return;
+			
+			var gv_svg = d3.select("#graph_vis"),
+				gv_svg_width  = +gv_svg.attr("width"),
+				gv_svg_height = +gv_svg.attr("height");
+			
+			var gv_svg_g = gv_svg.append("g");
+			if( prior_tform != null ){
+				gv_svg_g.attr("transform", prior_tform);
+			}
+			//		
+//			gv_svg.call(d3.zoom().on("zoom", function () {
+//				gv_svg.attr("transform", d3.event.transform)
+//			}));
+
+			var color = d3.scaleOrdinal( d3.schemeCategory20 );
+
+			simulation = d3.forceSimulation()
+				.force( "link",   d3.forceLink().id( function(d) { return d.id; } ) )
+				.force( "charge", d3.forceManyBody() )
+				.force( "center", d3.forceCenter(gv_svg_width / 2, gv_svg_height / 2) );
+
+			d3.json( "http://localhost:5000/graph?instance=" + prior_sel_idx + "&" + $('#parameterForm').serialize(), function(error, graph) {
+				if (error) throw error;
+
+				var link = gv_svg_g.append( "g" )
+							.attr( "class", "links" )
+							.selectAll( "line" )
+							.data( graph.links )
+								.enter().append( "line" )
+									.attr( "stroke-width", function(d) { return Math.sqrt(d.value); } )
+									.attr( "stroke", "lightgray" );
+
+				var node = gv_svg_g.append("g")
+							.attr("class", "nodes")
+							.selectAll("g")
+							.data(graph.nodes)
+								.enter().append("g")
+
+				var circles = node.append("circle")
+								.attr("r", 5)
+								.attr("fill", function(d) { return color(d.group); })
+								.call(d3.drag()
+									.on("start", dragstarted)
+									.on("drag", dragged)
+									.on("end", dragended) );
+				
+				var zoom_handler = d3.zoom().on("zoom", zoom_actions);
+
+				zoom_handler(gv_svg);	
+				
+				simulation
+					.nodes(graph.nodes)
+					.on("tick", ticked);
+
+				simulation.force("link")
+					.links(graph.links);
+
+				function zoom_actions(){
+					//console.log( d3.event.transform );
+					gv_svg_g.attr("transform", d3.event.transform);
+					prior_tform = d3.event.transform;
+				}
+
+				function ticked() {
+					link
+						.attr("x1", function(d) { return d.source.x; })
+						.attr("y1", function(d) { return d.source.y; })
+						.attr("x2", function(d) { return d.target.x; })
+						.attr("y2", function(d) { return d.target.y; });
+
+					node
+						.attr("transform", function(d) {
+							return "translate(" + d.x + "," + d.y + ")";
+						} );
+				}
+				
+				function dragstarted(d) {
+					if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+					d.fx = d.x;
+					d.fy = d.y;
+				}
+
+				function dragged(d) {
+					d.fx = d3.event.x;
+					d.fy = d3.event.y;
+				}
+
+				function dragended(d) {
+					if (!d3.event.active) simulation.alphaTarget(0);
+					d.fx = null;
+					d.fy = null;
+				}				
+
+			});
+			
+		}
+		
+
+		
+
+
+</script>
+	
+	
+	
+	<!-- Optional JavaScript --> 
+	<!-- jQuery first, then Popper.js, then Bootstrap JS --> 
+	<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script> 
+	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script> 
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script> 
+	
+	
+	<script>reloadData();</script>
+</body>
+</html>
+
