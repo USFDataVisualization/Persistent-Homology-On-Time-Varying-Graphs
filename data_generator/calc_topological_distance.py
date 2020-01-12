@@ -51,7 +51,8 @@ files_diff.sort();
 
 if __name__ == "__main__":
 
-
+    print( "Calculating Topological Distance: " + dirpath )
+    
     tmp_files_biharm = tda.filter_inf_pd_files( files_biharm, cc_outfile=dirpath + "/cc_biharm.txt" )
     tmp_files_comm   = tda.filter_inf_pd_files( files_biharm, cc_outfile=dirpath + "/cc_comm.txt" )
     tmp_files_spath  = tda.filter_inf_pd_files( files_biharm, cc_outfile=dirpath + "/cc_spath.txt" )
