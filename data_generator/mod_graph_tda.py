@@ -2,17 +2,26 @@ import ripser as ripser
 import os
 import math
 import numpy as np
+import sys
 
 
-
-
-hera_bottleneck  = "/Users/prosen/tda/hera/bottleneck_dist"
-hera_wasserstein = "/Users/prosen/tda/hera/wasserstein_dist"
 
 rel_error = 0.01
 
+hera_bottleneck  = os.getenv('HERA_BOTTLENECK')
+hera_wasserstein = os.getenv('HERA_WASSERSTEIN')
 
 
+print( "Hera Bottleneck:  " + hera_bottleneck )
+print( "Hera Wasserstein: " + hera_wasserstein )
+
+if (not os.path.exists( hera_bottleneck )) or (not os.path.exists( hera_wasserstein )) :
+    print( "Path to Hera Bottleneck and Wasserstein not set correctly." )
+    print( "   For example: " )
+    print( "       > export HERA_BOTTLENECK=\"/Users/prosen/tda/hera/bottleneck_dist\"" )
+    print( "       > export HERA_WASSERSTEIN=\"/Users/prosen/tda/hera/wasserstein_dist\"" )
+    sys.exit()
+    
 def calculate_persistence_diagram( dist_matrix, pd_out ):
     R = ripser.ripser( dist_matrix, distance_matrix=True )
 

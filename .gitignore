@@ -10,3 +10,5 @@ flask/__pycache__
 flask/venv
 data/CollegeMsg*
 data/*.txt
+data/co-presence/*.txt
+data/email-Eu-core-temporal_*

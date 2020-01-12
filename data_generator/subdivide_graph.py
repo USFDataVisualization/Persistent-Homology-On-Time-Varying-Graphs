@@ -5,26 +5,32 @@ import sys
 
 
 parser = argparse.ArgumentParser(description='Time-varying Graph Subdivder.')
-parser.add_argument( '-s', '--splits', metavar='[N]', type=int, nargs=1, required=True, help='number of subgraphs to create')
+parser.add_argument( '-b', '--begin', metavar='[T]', type=int, nargs=1, required=False, help='timestamp to begin with')
+
+group = parser.add_mutually_exclusive_group(required=True)
+group.add_argument('-s', '--splits', metavar='[N]', type=int, nargs=1, help='number of subgraphs to create (can\'t be used with offset)' )
+group.add_argument('-f', '--offset', metavar='[T]', type=int, nargs=1, help='offset between the start of subgraphs (can\'t be used with split)' )
+
 parser.add_argument( '-o', '--overlap', metavar='[%]', type=float, nargs=1, required=True, help='overlap between adjacent file (e.g., 0.1 = 10%% overlap)' )
 parser.add_argument( '-i', '--input_file', metavar='[FILE]', nargs=1, required=True, help='input file (time-varying network)' )
 
 args = parser.parse_args()
 
 overlap = args.overlap[0]
-splits = args.splits[0]
+
+splits = None
+if args.splits != None :
+    splits = args.splits[0]
+    
 input_file = args.input_file[0]
 
-format = "%01d"
-if splits >= 9999 :
-    format = "%05d"
-elif splits >= 999 :
-    format = "%04d"
-elif splits >= 99 :
-    format = "%03d"
-elif splits >= 9 :
-    format = "%02d"
+begin = None
+if args.begin != None :
+    begin = args.begin[0]
 
+offset = None
+if args.offset != None :
+    offset = args.offset[0]
 
 
 
@@ -76,6 +82,47 @@ def write_split( filtered_file, outfile ):
 
 
 
+
+file1 = open(input_file,"r+")
+wholefile = file1.readlines()
+file1.close()
+
+mintime = 0xffffffffffffffff
+maxtime = 0
+
+for line in wholefile:
+    record = line.split( )
+    mintime = min( mintime, int(record[2]) );
+    maxtime = max( maxtime, int(record[2]) );
+
+
+start = mintime
+if( begin != None ):
+    start = begin
+
+step = offset
+if( splits != None ):
+    step  = (maxtime - mintime) / splits
+else:
+    splits = int((maxtime - mintime) / step)+1
+    
+overoff = step * overlap / 2
+
+    
+print( "Min: " + str(start) + ", Step: " + str(step) + ", Split: " + str(splits) )
+
+
+format = "%01d"
+if splits >= 9999 :
+    format = "%05d"
+elif splits >= 999 :
+    format = "%04d"
+elif splits >= 99 :
+    format = "%03d"
+elif splits >= 9 :
+    format = "%02d"
+
+
 base_path, base_extension = os.path.splitext(input_file)
 output_dir = base_path + "_" + str(splits) + "_" + str(overlap)
 base_filename = os.path.split(input_file)[1][0:-len(base_extension)]
@@ -93,23 +140,6 @@ except OSError as error:
     print( "Skipping (" + output_dir + "), output directory already exists" )
     sys.exit()
 
-
-file1 = open(input_file,"r+")
-wholefile = file1.readlines()
-file1.close()
-
-mintime = 0xffffffffffffffff
-maxtime = 0
-
-for line in wholefile:
-    record = line.split( )
-    mintime = min( mintime, int(record[2]) );
-    maxtime = max( maxtime, int(record[2]) );
-
-
-start = mintime
-step  = (maxtime - mintime) / splits
-overoff = step * overlap / 2
 
 for i in range(1, splits+1):
     end = mintime + step * i
