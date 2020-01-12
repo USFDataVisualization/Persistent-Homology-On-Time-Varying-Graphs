@@ -1,3 +1,4 @@
+import matplotlib 
 import ripser as ripser
 import os
 import math
@@ -5,6 +6,7 @@ import numpy as np
 import sys
 
 
+matplotlib.use('Agg')
 
 rel_error = 0.01
 
