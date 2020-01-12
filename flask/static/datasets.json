@@ -1,0 +1,45 @@
+[
+	{
+		"title" : "CollegeMsg",
+		"value" : "college",
+		"splits": [
+			"7", "28", "194"
+		],
+		"overlap" : [
+			"0.05", "0.1", "0.25", "0.5", "0.75"
+		]
+	},
+	{
+		"title" : "EU E-mail",
+		"value" : "eu-email",
+		"splits": [
+			"29", "115", "804"
+		],
+		"overlap" : [
+			"0.05", "0.1", "0.25", "0.5", "0.75"
+		]
+	},
+	{
+		"title" : "High School 2011",
+		"value" : "highschool2011",
+		"splits": [
+			"38", "76"
+		],
+		"overlap" : [
+			"0.05", "0.1", "0.25", "0.5", "0.75"
+		]
+	},
+	{
+		"title" : "High School 2012",
+		"value" : "highschool2012",
+		"splits": [
+			"102", "203"
+		],
+		"overlap" : [
+			"0.05", "0.1", "0.25", "0.5", "0.75"
+		]
+	}
+	
+
+]
+	

@@ -48,6 +48,9 @@
 			  <label for="dataset">Dataset</label>
 			  <select class="form-control form-control-sm" id="dataset" name="dataset" onchange="reloadData()">
 				<option value="college">CollegeMsg</option>
+				<option value="eu-email">EU Email</option>
+				<option value="highschool2012">Highschool 2011</option>
+				<option value="highschool2011">Highschool 2012</option>
 			  </select>
 			</div>
 			<div class="form-group">
@@ -112,6 +115,8 @@
 	<script>
 		
 		function reloadData(){
+			updateMenu();
+			
 			/*
 			var http = new XMLHttpRequest();
 			http.open("GET", "http://localhost:5000/dimred?" + $('#parameterForm').serialize(), true);
@@ -126,7 +131,7 @@
 			$("#linechart").empty();
 			
 			
-	        d3.json( "http://localhost:5000/dimred?dim=1&" + $('#parameterForm').serialize(), function(dtmp) {
+	        d3.json( "dimred?dim=1&" + $('#parameterForm').serialize(), function(dtmp) {
 								
 				var lc_svg = d3.select("#linechart");
 				var lc_svg_width  = +lc_svg.attr("width");
@@ -180,7 +185,7 @@
 			
 			
 			
-	        d3.json( "http://localhost:5000/dimred?dim=2&" + $('#parameterForm').serialize(), function(data) {
+	        d3.json( "dimred?dim=2&" + $('#parameterForm').serialize(), function(data) {
 				
 				
                 xExt = d3.extent( data, function(d){ return d[0]; });
@@ -248,7 +253,7 @@
 				curr_sel = d3.select(this);
 				curr_sel.attr("fill", "orange");
 				
-				d3.json( "http://localhost:5000/graph?instance=" + idx + "&" + $('#parameterForm').serialize(), function(data) {
+				d3.json( "graph?instance=" + idx + "&" + $('#parameterForm').serialize(), function(data) {
 					console.log( data );
 				});
 				
@@ -308,7 +313,7 @@
 				.force( "charge", d3.forceManyBody() )
 				.force( "center", d3.forceCenter(gv_svg_width / 2, gv_svg_height / 2) );
 
-			d3.json( "http://localhost:5000/graph?instance=" + prior_sel_idx + "&" + $('#parameterForm').serialize(), function(error, graph) {
+			d3.json( "graph?instance=" + prior_sel_idx + "&" + $('#parameterForm').serialize(), function(error, graph) {
 				if (error) throw error;
 
 				var link = gv_svg_g.append( "g" )
@@ -399,7 +404,54 @@
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script> 
 	
 	
-	<script>reloadData();</script>
+	<script>
+		var datsets = null;
+		var cur_dataset = null;
+		
+		
+		function updateMenu(){
+				
+			var sel_data = document.getElementById("dataset").value;
+			
+			if( cur_dataset == sel_data ){
+				return;
+			}
+			cur_dataset = sel_data;
+			
+			datasets.forEach( function(d){
+				//ds_html += '<option value="' + d["value"] + '">' + d["title"] + '</option>''
+				if( sel_data == d["value"] ){
+					var sp_html = "";
+					( d["splits"]).forEach( function(s){
+						sp_html += '<option value="' + s + '">' + s + '</option>';
+					});
+					document.getElementById("splits").innerHTML = sp_html;
+					
+					var op_html = "";
+					( d["overlap"]).forEach( function(s){
+						op_html += '<option value="' + s + '">' + s + '</option>';
+					});
+					document.getElementById("overlap").innerHTML = op_html;
+				}
+			});	
+			
+
+		}
+		
+		
+		d3.json( "static/datasets.json", function(dtmp) {
+			datasets = dtmp;
+			
+			var ds_html = "";
+			datasets.forEach( function(d){
+				ds_html += '<option value="' + d["value"] + '">' + d["title"] + '</option>';
+			});
+			document.getElementById("dataset").innerHTML = ds_html;		
+			
+			//console.log( datasets );
+			reloadData();	
+		});
+		</script>
 </body>
 </html>
 

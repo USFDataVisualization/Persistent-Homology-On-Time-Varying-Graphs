@@ -1,0 +1,6 @@
+
+$ pip install networkx
+$ pip install numpy
+$ pip install Cython
+$ pip install ripser
+
