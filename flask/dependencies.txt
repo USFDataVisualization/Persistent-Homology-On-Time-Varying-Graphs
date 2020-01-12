@@ -11,6 +11,7 @@ $ . venv/bin/activate
 
 Within the activated environment, use the following command to install Flask and dependancies:
 
+$ pip install wheel
 $ pip install Flask
 $ pip install numpy
 $ pip install sklearn

@@ -12,3 +12,6 @@ data/CollegeMsg*
 data/*.txt
 data/co-presence/*.txt
 data/email-Eu-core-temporal_*
+data/highschool_2011_*
+data/highschool_2012_*
+data_generator/generate.log
