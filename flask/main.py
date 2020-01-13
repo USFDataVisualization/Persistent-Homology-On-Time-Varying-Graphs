@@ -36,6 +36,19 @@ def getGraph():
         dir = dir + "CollegeMsg_"
         file = file + "CollegeMsg_split"
     
+    if request.args.get('dataset') == 'eu-email' :
+        dir = dir + "email-Eu-core-temporal_"
+        file = file + "email-Eu-core-temporal_split"
+
+    if request.args.get('dataset') == 'highschool2011' :
+        dir = dir + "highschool_2011_"
+        file = file + "highschool_2011_split"
+
+    if request.args.get('dataset') == 'highschool2012' :
+        dir = dir + "highschool_2012_"
+        file = file + "highschool_2012_split"
+
+        
     splits = int( request.args.get('splits') )
     overlap = float( request.args.get('overlap') )
     instance = int( request.args.get('instance') )
@@ -73,6 +86,15 @@ def dimred():
     if request.args.get('dataset') == 'college' :
         dir = dir + "CollegeMsg_"
         
+    if request.args.get('dataset') == 'eu-email' :
+        dir = dir + "email-Eu-core-temporal_"
+        
+    if request.args.get('dataset') == 'highschool2011' :
+        dir = dir + "highschool_2011_"
+        
+    if request.args.get('dataset') == 'highschool2012' :
+        dir = dir + "highschool_2012_"
+
     dir = dir + str( int( request.args.get('splits') ) ) + "_"
     dir = dir + str( float( request.args.get('overlap') ) )
 
