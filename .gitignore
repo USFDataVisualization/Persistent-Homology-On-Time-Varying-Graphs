@@ -16,3 +16,4 @@ data/highschool_2011_*
 data/highschool_2012_*
 data_generator/generate.log
 data/sg_infectious_*/
+flask/run_prod.log

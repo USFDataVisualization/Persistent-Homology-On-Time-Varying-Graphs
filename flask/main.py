@@ -51,7 +51,7 @@ def getGraph():
         
     splits = int( request.args.get('splits') )
     overlap = float( request.args.get('overlap') )
-    instance = int( request.args.get('instance') )
+    instance = int( request.args.get('instance') ) + 1
     
     
     format = "%01d"
