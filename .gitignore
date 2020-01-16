@@ -17,3 +17,5 @@ data/highschool_2012_*
 data_generator/generate.log
 data/sg_infectious_*/
 flask/run_prod.log
+data/sg_infectious_contact_list.tar
+data_generator/generate_infectious.log

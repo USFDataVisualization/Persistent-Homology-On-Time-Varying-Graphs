@@ -4,7 +4,7 @@ export HERA_BOTTLENECK="/tda/hera/bottleneck_dist"
 export HERA_WASSERSTEIN="/tda/hera/wasserstein_dist"
 
 
-splits=( "1" "2" "4" "8" )
+splits=( "4" "8" "16" )
 overlaps=( "0.05" "0.1" "0.25" "0.5" "0.75" )
 
 
@@ -20,8 +20,8 @@ do
         
         output="../data/sg_infectious_"$s"_"$o
         mkdir $output
-        rm $output"/"*.edgelist
-        rm $output"/"*.txt
+        rm -f $output"/"*.edgelist
+        rm -f $output"/"*.txt
         
         mv "../data/sg_infectious_contact_list/listcontacts_2009_"*"_"$s"_"$o"/"* $output"/"
         
@@ -40,7 +40,7 @@ do
 
     done
     
-    rm -r "../data/sg_infectious_contact_list/listcontacts_2009_"*"_"$o"/"
+    rm -rf "../data/sg_infectious_contact_list/listcontacts_2009_"*"_"$o"/"
 
 done
 
