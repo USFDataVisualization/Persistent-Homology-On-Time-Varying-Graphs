@@ -8,7 +8,6 @@ splits=( "1" "2" "4" "8" )
 overlaps=( "0.05" "0.1" "0.25" "0.5" "0.75" )
 
 
-#for s in "${splits[@]}"
 for o in "${overlaps[@]}"
 do
     for s in "${splits[@]}"
@@ -21,25 +20,22 @@ do
         
         output="../data/sg_infectious_"$s"_"$o
         mkdir $output
+        rm $output"/"*.edgelist
+        rm $output"/"*.txt
+        
         mv "../data/sg_infectious_contact_list/listcontacts_2009_"*"_"$s"_"$o"/"* $output"/"
         
-        i=0
-        ls $output"/"*".edgelist" | sort | while read -r line ; do
-            foo=$(printf "%04d" $i)
+        
+        ls $output"/"*".edgelist" | sort | cat -n | while read n f; do
+            foo=$(printf "%04d" $n)
             newfile=$output"/sg_infectious_split"$foo".edgelist"
-            mv $line $newfile
-            echo $line $newfile
-            i=$((i+1))
+            mv $f $newfile
         done
-
-        i=0
-        j=0
-        ls $output"/"*".txt" | sort | while read -r line ; do
-            bar=$(printf "%04d" $j)
-            newfile=$output"/sg_infectious_split"$bar".txt"
-            mv $line $newfile
-            echo $line $newfile
-            j=$((j+1))
+        
+        ls $output"/"*".txt" | sort | cat -n | while read n f; do
+            foo=$(printf "%04d" $n)
+            newfile=$output"/sg_infectious_split"$foo".txt"
+            mv $f $newfile
         done
 
     done
@@ -52,11 +48,9 @@ done
 
 for d in ../data/sg_infectious_*/; do
     python3 calc_persistence_diagram.py -d $d
-    #python3 calc_topological_distance.py -d $d
 done
 
 for d in ../data/sg_infectious_*/; do
-    #python3 calc_persistence_diagram.py -d $d
     python3 calc_topological_distance.py -d $d
 done
 
