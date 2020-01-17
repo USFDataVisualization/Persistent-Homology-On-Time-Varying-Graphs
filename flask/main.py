@@ -1,23 +1,28 @@
 from flask import Flask
 from flask import request
 from flask import render_template
-from flask import Flask, request, send_from_directory
+from flask import send_from_directory
+from flask import send_file
 
 import os
 import networkx as nx
+import json
 
 import dimred as DR
 
-app = Flask( __name__, template_folder="template" )
+app = Flask( __name__ )
+datasets = []
+
+with open('static/datasets.json') as json_file:
+    datasets = json.load(json_file)
+
 
 def error( err ):
     print( err )
 
 @app.route('/')
-def hello_world():
-    #return DR.run_mds("../data/CollegeMsg_20_0.05", "bott_biharm.txt" )
-    #return 'Hello, World!'
-    return render_template('main.html', error=error)
+def render_index():
+    return send_file('pages/main.html')
 
 
 @app.route('/static/<path:path>')
@@ -25,50 +30,42 @@ def send_static(path):
     return send_from_directory('static', path)
 
 
+@app.errorhandler(404)
+def page_not_found(error):
+    return 'This page does not exist', 404
+
 @app.route('/graph', methods=['GET', 'POST'])
 def getGraph():
-    #print( request.args )
 
-    dir = "../data/"
-    file = ""
-
-    if request.args.get('dataset') == 'college' :
-        dir = dir + "CollegeMsg_"
-        file = file + "CollegeMsg_split"
-    
-    if request.args.get('dataset') == 'eu-email' :
-        dir = dir + "email-Eu-core-temporal_"
-        file = file + "email-Eu-core-temporal_split"
-
-    if request.args.get('dataset') == 'highschool2011' :
-        dir = dir + "highschool_2011_"
-        file = file + "highschool_2011_split"
-
-    if request.args.get('dataset') == 'highschool2012' :
-        dir = dir + "highschool_2012_"
-        file = file + "highschool_2012_split"
-
-        
     splits = int( request.args.get('splits') )
     overlap = float( request.args.get('overlap') )
     instance = int( request.args.get('instance') ) + 1
     
-    
-    format = "%01d"
-    if splits >= 9999 :
-        format = "%05d"
-    elif splits >= 999 :
-        format = "%04d"
-    elif splits >= 99 :
-        format = "%03d"
-    elif splits >= 9 :
-        format = "%02d"
+
+
+    dir  = ""
+    file = ""
+
+    for ds in datasets :
+        if request.args.get('dataset') == ds['value'] :
         
-    dir = dir + str( splits ) + "_" + str( overlap )
-    file = file + (format % instance) + ".edgelist"
-    
-    #print( dir + "/" + file )
-    
+            format = "%01d"
+            if splits >= 9999 :
+                format = "%05d"
+            elif splits >= 999 :
+                format = "%04d"
+            elif splits >= 99 :
+                format = "%03d"
+            elif splits >= 9 :
+                format = "%02d"
+
+            if 'format_override' in ds :
+                format = ds['format_override']
+            
+            dir  = "../data/" + ds['dir'] + str( splits ) + "_" + str( overlap )
+            file = ds['file'] + (format % instance) + ".edgelist"
+
+
     if os.path.exists( dir + "/" + file ) :
         G = nx.read_weighted_edgelist( dir + "/" + file )
         return nx.node_link_data(G)
@@ -81,22 +78,15 @@ def getGraph():
 def dimred():
     #print( request.args )
 
-    dir = "../data/"
+    dir = ""
     
-    if request.args.get('dataset') == 'college' :
-        dir = dir + "CollegeMsg_"
-        
-    if request.args.get('dataset') == 'eu-email' :
-        dir = dir + "email-Eu-core-temporal_"
-        
-    if request.args.get('dataset') == 'highschool2011' :
-        dir = dir + "highschool_2011_"
-        
-    if request.args.get('dataset') == 'highschool2012' :
-        dir = dir + "highschool_2012_"
+    splits = int( request.args.get('splits') )
+    overlap = float( request.args.get('overlap') )
 
-    dir = dir + str( int( request.args.get('splits') ) ) + "_"
-    dir = dir + str( float( request.args.get('overlap') ) )
+    for ds in datasets :
+        if request.args.get('dataset') == ds['value'] :
+            dir  = "../data/" + ds['dir'] + str( splits ) + "_" + str( overlap )
+
 
     filename = ""
     if request.args.get('topo_dist') == 'bottleneck' :
